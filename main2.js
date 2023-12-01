@@ -7,6 +7,18 @@ if(document.readyState == 'loading'){
     ready();
 }
 
+const peluches = [
+    { titulo: 'Alice', precio: 3999, imagenSrc: './multimedia/peluchitoUno.PNG' },
+    { titulo: 'Alonso', precio: 3999, imagenSrc: './multimedia/peluchitoDos.PNG' },
+    { titulo: 'Buzz', precio: 3999, imagenSrc: './multimedia/peluchitoTres.PNG' },
+    { titulo: 'Kenny', precio: 3999, imagenSrc: './multimedia/peluchitoCuatro.PNG' },
+    { titulo: 'Olivia', precio: 3999, imagenSrc: './multimedia/peluchitoCinco.PNG' },
+    { titulo: 'Poppy', precio: 3999, imagenSrc: './multimedia/peluchitoSeis.PNG' },
+    { titulo: 'Rosie', precio: 3999, imagenSrc: './multimedia/peluchitoSiete.PNG' },
+    { titulo: 'Sipash', precio: 3999, imagenSrc: './multimedia/peluchitoOcho.PNG' },
+    { titulo: 'Sofia', precio: 3999, imagenSrc: './multimedia/peluchitoNueve.PNG' }
+];
+
 function ready(){
     
     //agrego funcionalidad a los botones eliminar del carrito
@@ -34,7 +46,7 @@ function ready(){
     let botonesAgregarAlCarrito = document.getElementsByClassName('boton-item');
     for(let i=0; i<botonesAgregarAlCarrito.length;i++){
         let boton = botonesAgregarAlCarrito[i];
-        boton.addEventListener('click', agregarAlCarritoClickeado);
+        boton.addEventListener('click', (event) => agregarAlCarritoClickeado(event, i));
     }
 
     //agrego funcionalidad al botón comprar
@@ -53,16 +65,10 @@ function pagarClickeado(){
 }
 
 //funcion que controla el boton clickeado de agregar al carrito
-function agregarAlCarritoClickeado(event){
+function agregarAlCarritoClickeado(event, indicePeluche) {
     let boton = event.target;
-    let item = boton.parentElement;
-    let titulo = item.getElementsByClassName('titulo-item')[0].innerText;
-    let precio = item.getElementsByClassName('precio-item')[0].innerText;
-    let imagenSrc = item.getElementsByClassName('img-item')[0].src;
-    console.log(imagenSrc);
-
-    agregarItemAlCarrito(titulo, precio, imagenSrc);
-
+    let peluche = peluches[indicePeluche];
+    agregarItemAlCarrito(peluche);
     hacerVisibleCarrito();
 }
 
@@ -78,10 +84,14 @@ function hacerVisibleCarrito(){
 }
 
 //funcion que agrega un item al carrito
-function agregarItemAlCarrito(titulo, precio, imagenSrc){
+function agregarItemAlCarrito(peluche){
     let item = document.createElement('div');
-    item.classList.add = ('item');
+    item.classList.add('carrito-item');
     let itemsCarrito = document.getElementsByClassName('carrito-items')[0];
+
+    let titulo = peluche.titulo;
+    let precio = peluche.precio;
+    let imagenSrc = peluche.imagenSrc;
 
     //controlamos que el item que intenta ingresar no se encuentre en el carrito
     let nombresItemsCarrito = itemsCarrito.getElementsByClassName('carrito-item-titulo');
@@ -191,4 +201,14 @@ function actualizarTotalCarrito(){
     total = Math.round(total * 100)/100;
 
     document.getElementsByClassName('carrito-precio-total')[0].innerText = '$'+total.toLocaleString("es") + ",00";
+}
+
+// Buscar peluche por título
+function buscarPeluchePorTitulo(titulo) {
+    return peluches.find(peluche => peluche.titulo === titulo);
+}
+
+// Filtrar peluches por precio máximo
+function filtrarPeluchesPorPrecioMaximo(precioMaximo) {
+    return peluches.filter(peluche => peluche.precio <= precioMaximo);
 }
