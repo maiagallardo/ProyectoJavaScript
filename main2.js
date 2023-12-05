@@ -95,11 +95,9 @@ function agregarItemAlCarrito(peluche){
 
     //controlamos que el item que intenta ingresar no se encuentre en el carrito
     let nombresItemsCarrito = itemsCarrito.getElementsByClassName('carrito-item-titulo');
-    for(let i=0;i < nombresItemsCarrito.length;i++){
-        if(nombresItemsCarrito[i].innerText==titulo){
-            alert("El item ya se encuentra en el carrito");
-            return;
-        }
+    if (Array.from(nombresItemsCarrito).some(item => item.innerText === titulo)) {
+        alert("El item ya se encuentra en el carrito");
+        return;
     }
 
     let itemCarritoContenido = `
@@ -139,23 +137,17 @@ function agregarItemAlCarrito(peluche){
 function sumarCantidad(event){
     let botonClickeado = event.target;
     let selector = botonClickeado.parentElement;
-    console.log(selector.getElementsByClassName('carrito-item-cantidad')[0].value);
-    let cantidadActual = selector.getElementsByClassName('carrito-item-cantidad')[0].value;
-    cantidadActual++;
-    selector.getElementsByClassName('carrito-item-cantidad')[0].value = cantidadActual;
+    let cantidadActual = parseInt(selector.getElementsByClassName('carrito-item-cantidad')[0].value);
+    cantidadActual >= 1 && (selector.getElementsByClassName('carrito-item-cantidad')[0].value = cantidadActual + 1);
     actualizarTotalCarrito();
 }
 //resto en uno la cantidad del elemento seleccionado
 function restarCantidad(event){
     let botonClickeado = event.target;
     let selector = botonClickeado.parentElement;
-    console.log(selector.getElementsByClassName('carrito-item-cantidad')[0].value);
-    let cantidadActual = selector.getElementsByClassName('carrito-item-cantidad')[0].value;
-    cantidadActual--;
-    if(cantidadActual>=1){
-        selector.getElementsByClassName('carrito-item-cantidad')[0].value = cantidadActual;
-        actualizarTotalCarrito();
-    }
+    let cantidadActual = parseInt(selector.getElementsByClassName('carrito-item-cantidad')[0].value);
+    cantidadActual > 1 && (selector.getElementsByClassName('carrito-item-cantidad')[0].value = cantidadActual - 1);
+    actualizarTotalCarrito();
 }
 
 //elimino el item seleccionado del carrito
