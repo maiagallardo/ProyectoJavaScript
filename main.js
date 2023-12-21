@@ -7,8 +7,21 @@ if(document.readyState == 'loading'){
     ready();
 }
 
+// Reemplaza el array de datos original con una llamada a fetch
+fetch('datos.json')
+  .then(response => response.json())
+  .then(data => {
+    // Ahora, 'data' contiene el array de datos
+    peluches = data;
+
+    ready();
+  })
+  .catch(error => {
+    console.error('Error al cargar datos desde el archivo JSON:', error);
+  });
+
 function ready(){
-    
+
     //agrego funcionalidad a los botones eliminar del carrito
     let botonesEliminarItem = document.getElementsByClassName('btn-eliminar');
     for(let i=0;i<botonesEliminarItem.length; i++){
@@ -34,7 +47,7 @@ function ready(){
     let botonesAgregarAlCarrito = document.getElementsByClassName('boton-item');
     for(let i=0; i<botonesAgregarAlCarrito.length;i++){
         let boton = botonesAgregarAlCarrito[i];
-        boton.addEventListener('click', agregarAlCarritoClickeado);
+        boton.addEventListener('click', (event) => agregarAlCarritoClickeado(event, i));
     }
 
     //agrego funcionalidad al botón comprar
@@ -42,7 +55,11 @@ function ready(){
 }
 
 function pagarClickeado(){
-    alert("Gracias por la compra");
+    Swal.fire({
+        title: 'Gracias por la compra',
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+    });
     
     let carritoItems = document.getElementsByClassName('carrito-items')[0];
     while (carritoItems.hasChildNodes()){
@@ -53,16 +70,10 @@ function pagarClickeado(){
 }
 
 //funcion que controla el boton clickeado de agregar al carrito
-function agregarAlCarritoClickeado(event){
+function agregarAlCarritoClickeado(event, indicePeluche) {
     let boton = event.target;
-    let item = boton.parentElement;
-    let titulo = item.getElementsByClassName('titulo-item')[0].innerText;
-    let precio = item.getElementsByClassName('precio-item')[0].innerText;
-    let imagenSrc = item.getElementsByClassName('img-item')[0].src;
-    console.log(imagenSrc);
-
-    agregarItemAlCarrito(titulo, precio, imagenSrc);
-
+    let peluche = peluches[indicePeluche];
+    agregarItemAlCarrito(peluche);
     hacerVisibleCarrito();
 }
 
@@ -77,19 +88,57 @@ function hacerVisibleCarrito(){
     items.style.width = '60%';
 }
 
+//actualizo el total de Carrito
+function actualizarTotalCarrito() {
+    let carritoContenedor = document.getElementsByClassName('carrito')[0];
+    let carritoItems = carritoContenedor.getElementsByClassName('carrito-item');
+    let total = 0;
+
+    for (let i = 0; i < carritoItems.length; i++) {
+        let item = carritoItems[i];
+        let precioElemento = item.getElementsByClassName('carrito-item-precio')[0];
+        let precio = parseFloat(precioElemento.innerText.replace('$', '').replace(',', ''));
+        
+        let cantidadItem = item.getElementsByClassName('carrito-item-cantidad')[0];
+        let cantidad = parseInt(cantidadItem.value);
+
+        if (!isNaN(precio) && !isNaN(cantidad)) {
+            console.log(precio)
+            total += parseFloat((precio * cantidad/2).toFixed(2));
+            console.log(total)
+        }
+    }
+
+    // Formatear el total con dos decimales y agregar el símbolo $
+    let totalFormateado = '$' + total.toFixed(2);
+
+    document.getElementsByClassName('carrito-precio-total')[0].innerText = totalFormateado;
+}
+
 //funcion que agrega un item al carrito
-function agregarItemAlCarrito(titulo, precio, imagenSrc){
+function agregarItemAlCarrito(peluche) {
     let item = document.createElement('div');
-    item.classList.add = ('item');
+    item.classList.add('carrito-item');
     let itemsCarrito = document.getElementsByClassName('carrito-items')[0];
 
-    //controlamos que el item que intenta ingresar no se encuentre en el carrito
-    let nombresItemsCarrito = itemsCarrito.getElementsByClassName('carrito-item-titulo');
-    for(let i=0;i < nombresItemsCarrito.length;i++){
-        if(nombresItemsCarrito[i].innerText==titulo){
-            alert("El item ya se encuentra en el carrito");
-            return;
-        }
+    let id = peluche.id;
+    let titulo = peluche.titulo;
+    let precio = peluche.precio;
+    let imagenSrc = peluche.imagenSrc;
+
+    // Convertir la colección de elementos a un array y obtener los ids
+    let idsItemsCarrito = Array.from(itemsCarrito.getElementsByClassName('carrito-item')).map(item => parseInt(item.dataset.itemId) || 0);
+
+    console.log("Ids en el carrito:", idsItemsCarrito);
+
+    // Controlar si el artículo ya está en el carrito
+    if (idsItemsCarrito.includes(id)) {
+        Swal.fire({
+            title: 'El artículo ya está en el carrito',
+            icon: 'warning',
+            confirmButtonText: 'Aceptar'
+        });
+        return;
     }
 
     let itemCarritoContenido = `
@@ -104,24 +153,27 @@ function agregarItemAlCarrito(titulo, precio, imagenSrc){
                 </div>
                 <span class="carrito-item-precio">${precio}</span>
             </div>
-            <boton class="btn-eliminar">
+            <button class="btn-eliminar">
                 <i class="fa-solid fa-trash"></i>
-            </boton>
+            </button>
         </div>
-    `
+    `;
     item.innerHTML = itemCarritoContenido;
     itemsCarrito.append(item);
 
-    //agrego la funcionalidad eliminar al nuevo item
-     item.getElementsByClassName('btn-eliminar')[0].addEventListener('click', eliminarItemCarrito);
+    // Añadir el id como un atributo de datos al elemento del carrito
+    item.dataset.itemId = id;
 
-    //agrego al funcionalidad restar cantidad del nuevo item
+    // Agregar la funcionalidad eliminar al nuevo item
+    item.getElementsByClassName('btn-eliminar')[0].addEventListener('click', eliminarItemCarrito);
+
+    // Agregar la funcionalidad restar cantidad del nuevo item
     let botonRestarCantidad = item.getElementsByClassName('restar-cantidad')[0];
-    botonRestarCantidad.addEventListener('click',restarCantidad);
+    botonRestarCantidad.addEventListener('click', restarCantidad);
 
-    //agrego la funcionalidad sumar cantidad del nuevo item
+    // Agregar la funcionalidad sumar cantidad del nuevo item
     let botonSumarCantidad = item.getElementsByClassName('sumar-cantidad')[0];
-    botonSumarCantidad.addEventListener('click',sumarCantidad);
+    botonSumarCantidad.addEventListener('click', sumarCantidad);
 
     actualizarTotalCarrito();
 }
@@ -129,25 +181,18 @@ function agregarItemAlCarrito(titulo, precio, imagenSrc){
 function sumarCantidad(event){
     let botonClickeado = event.target;
     let selector = botonClickeado.parentElement;
-    console.log(selector.getElementsByClassName('carrito-item-cantidad')[0].value);
-    let cantidadActual = selector.getElementsByClassName('carrito-item-cantidad')[0].value;
-    cantidadActual++;
-    selector.getElementsByClassName('carrito-item-cantidad')[0].value = cantidadActual;
+    let cantidadActual = parseInt(selector.getElementsByClassName('carrito-item-cantidad')[0].value);
+    cantidadActual >= 1 && (selector.getElementsByClassName('carrito-item-cantidad')[0].value = cantidadActual + 1);
     actualizarTotalCarrito();
 }
 //resto en uno la cantidad del elemento seleccionado
 function restarCantidad(event){
     let botonClickeado = event.target;
     let selector = botonClickeado.parentElement;
-    console.log(selector.getElementsByClassName('carrito-item-cantidad')[0].value);
-    let cantidadActual = selector.getElementsByClassName('carrito-item-cantidad')[0].value;
-    cantidadActual--;
-    if(cantidadActual>=1){
-        selector.getElementsByClassName('carrito-item-cantidad')[0].value = cantidadActual;
-        actualizarTotalCarrito();
-    }
+    let cantidadActual = parseInt(selector.getElementsByClassName('carrito-item-cantidad')[0].value);
+    cantidadActual > 1 && (selector.getElementsByClassName('carrito-item-cantidad')[0].value = cantidadActual - 1);
+    actualizarTotalCarrito();
 }
-
 //elimino el item seleccionado del carrito
 function eliminarItemCarrito(event){
     let botonClickeado = event.target;
@@ -171,24 +216,12 @@ function ocultarCarrito(){
     }
 }
 
-//actualizo el total de Carrito
-function actualizarTotalCarrito(){
-    //seleccionamos el contenedor carrito
-    let carritoContenedor = document.getElementsByClassName('carrito')[0];
-    let carritoItems = carritoContenedor.getElementsByClassName('carrito-item');
-    let total = 0;
-    //recorremos cada elemento del carrito para actualizar el total
-    for(let i=0; i< carritoItems.length;i++){
-        let item = carritoItems[i];
-        let precioElemento = item.getElementsByClassName('carrito-item-precio')[0];
-        //quitamos el simobolo peso y el punto de milesimos.
-        let precio = parseFloat(precioElemento.innerText.replace('$','').replace('.',''));
-        let cantidadItem = item.getElementsByClassName('carrito-item-cantidad')[0];
-        console.log(precio);
-        let cantidad = cantidadItem.value;
-        total = total + (precio * cantidad);
-    }
-    total = Math.round(total * 100)/100;
+// Buscar peluche por título
+function buscarPeluchePorTitulo(titulo) {
+    return peluches.find(peluche => peluche.titulo === titulo);
+}
 
-    document.getElementsByClassName('carrito-precio-total')[0].innerText = '$'+total.toLocaleString("es") + ",00";
+// Filtrar peluches por precio máximo
+function filtrarPeluchesPorPrecioMaximo(precioMaximo) {
+    return peluches.filter(peluche => peluche.precio <= precioMaximo);
 }

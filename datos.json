@@ -1,0 +1,11 @@
+[
+    { "id": 1, "titulo": "Alice", "precio": 3999, "imagenSrc": "./multimedia/peluchitoUno.PNG" },
+    { "id": 2, "titulo": "Alonso", "precio": 3999, "imagenSrc": "./multimedia/peluchitoDos.PNG" },
+    { "id": 3, "titulo": "Buzz", "precio": 3999, "imagenSrc": "./multimedia/peluchitoTres.PNG" },
+    { "id": 4, "titulo": "Kenny", "precio": 3999, "imagenSrc": "./multimedia/peluchitoCuatro.PNG" },
+    { "id": 5, "titulo": "Olivia", "precio": 3999, "imagenSrc": "./multimedia/peluchitoCinco.PNG" },
+    { "id": 6, "titulo": "Poppy", "precio": 3999, "imagenSrc": "./multimedia/peluchitoSeis.PNG" },
+    { "id": 7, "titulo": "Rosie", "precio": 3999, "imagenSrc": "./multimedia/peluchitoSiete.PNG" },
+    { "id": 8, "titulo": "Sipash", "precio": 3999, "imagenSrc": "./multimedia/peluchitoOcho.PNG" },
+    { "id": 9, "titulo": "Sofia", "precio": 3999, "imagenSrc": "./multimedia/peluchitoNueve.PNG" }
+]
