@@ -52,6 +52,9 @@ function ready(){
 
     //agrego funcionalidad al botón comprar
     document.getElementsByClassName('btn-pagar')[0].addEventListener('click',pagarClickeado)
+
+    cargarCarritoDesdeLocalStorage();
+
 }
 
 function pagarClickeado(){
@@ -121,18 +124,15 @@ function agregarItemAlCarrito(peluche) {
     item.classList.add('carrito-item');
     let itemsCarrito = document.getElementsByClassName('carrito-items')[0];
 
-    let id = peluche.id;
     let titulo = peluche.titulo;
     let precio = peluche.precio;
     let imagenSrc = peluche.imagenSrc;
 
-    // Convertir la colección de elementos a un array y obtener los ids
-    let idsItemsCarrito = Array.from(itemsCarrito.getElementsByClassName('carrito-item')).map(item => parseInt(item.dataset.itemId) || 0);
-
-    console.log("Ids en el carrito:", idsItemsCarrito);
+    // Convertir la colección de elementos a un array y obtener los textos
+    let nombresItemsCarrito = Array.from(itemsCarrito.getElementsByClassName('carrito-item-titulo')).map(item => item.innerText.trim().toLowerCase());
 
     // Controlar si el artículo ya está en el carrito
-    if (idsItemsCarrito.includes(id)) {
+    if (nombresItemsCarrito.includes(titulo.trim().toLowerCase())) {
         Swal.fire({
             title: 'El artículo ya está en el carrito',
             icon: 'warning',
@@ -161,9 +161,6 @@ function agregarItemAlCarrito(peluche) {
     item.innerHTML = itemCarritoContenido;
     itemsCarrito.append(item);
 
-    // Añadir el id como un atributo de datos al elemento del carrito
-    item.dataset.itemId = id;
-
     // Agregar la funcionalidad eliminar al nuevo item
     item.getElementsByClassName('btn-eliminar')[0].addEventListener('click', eliminarItemCarrito);
 
@@ -176,7 +173,32 @@ function agregarItemAlCarrito(peluche) {
     botonSumarCantidad.addEventListener('click', sumarCantidad);
 
     actualizarTotalCarrito();
+    guardarCarritoEnLocalStorage();
+
 }
+
+function guardarCarritoEnLocalStorage() {
+    let carritoItems = document.getElementsByClassName('carrito-items')[0];
+    let carrito = Array.from(carritoItems.getElementsByClassName('carrito-item')).map(item => {
+        let titulo = item.querySelector('.carrito-item-titulo').innerText;
+        let precio = item.querySelector('.carrito-item-precio').innerText;
+        let imagenSrc = item.querySelector('img').src;
+        return { titulo, precio, imagenSrc };
+    });
+
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+}
+
+function cargarCarritoDesdeLocalStorage() {
+    let carritoString = localStorage.getItem('carrito');
+    if (carritoString) {
+        let carrito = JSON.parse(carritoString);
+
+        // Agregar los elementos del carrito almacenados en localStorage al DOM
+        carrito.forEach(item => agregarItemAlCarrito(item));
+    }
+}
+
 //aumento en uno la cantidad del elemento seleccionado
 function sumarCantidad(event){
     let botonClickeado = event.target;
